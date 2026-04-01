@@ -7,6 +7,9 @@ import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
+/**
+ * @author lenovo
+ */
 @Mapper
 public interface MessageMapper extends BaseMapper<MessageDO> {
     default List<MessageDO> selectByStatusIsZero(){
@@ -21,4 +24,5 @@ public interface MessageMapper extends BaseMapper<MessageDO> {
                 .le(MessageDO::getRetryCount,3));
     }
 
+    void batchInsert(List<MessageDO> list);
 }

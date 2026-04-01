@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 消息Service实现类
  *
@@ -23,7 +26,7 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public boolean InsertMessage(MessageReqVO reqVO) {
+    public boolean insertMessage(MessageReqVO reqVO) {
 
         MessageDO messageDO = new MessageDO();
         messageDO.setOrderId(reqVO.getOrderId());
@@ -51,5 +54,21 @@ public class MessageServiceImpl implements MessageService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public Integer batchInsertMessage(List<MessageReqVO> voList) {
+        List<MessageDO> list = new ArrayList<>();
+        for (MessageReqVO vo : voList) {
+            MessageDO messageDO = new MessageDO();
+            messageDO.setOrderId(vo.getOrderId());
+            messageDO.setServiceType(vo.getServiceType());
+            messageDO.setContent(vo.getContent());
+            messageDO.setStatus(0);
+            list.add(messageDO);
+        }
+
+        messageMapper.batchInsert(list);
+        return null;
     }
 }

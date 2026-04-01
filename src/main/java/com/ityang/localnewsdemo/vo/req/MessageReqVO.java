@@ -22,5 +22,9 @@ public class MessageReqVO {
 
     private Integer retryCount;
 
+    private Integer serviceType;
+
+    private String content;
+
 
 }

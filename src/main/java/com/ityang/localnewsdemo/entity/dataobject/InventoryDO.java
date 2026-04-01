@@ -8,14 +8,15 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 消息DO类
+ * 库存实体类DO
  *
  * @author lenovo
- * @date 2026-03-22
+ * @date 2026-03-29
  */
 @Data
-@TableName("`message`")
-public class MessageDO {
+@TableName("`inventory`")
+public class InventoryDO {
+
     /**
      * 主键id
      */
@@ -23,29 +24,14 @@ public class MessageDO {
     private Long id;
 
     /**
-     * 关联的订单ID
+     * 关联的商品ID
      */
-    private Long orderId;
+    private Long productId;
 
     /**
-     * 消息状态
+     * 库存数量
      */
-    private Integer status;
-
-    /**
-     * 重试次数
-     */
-    private Integer retryCount;
-
-    /**
-     * 消息类型 1-inventory，2-points
-     */
-    private Integer serviceType;
-
-    /**
-     * 消息内容
-     */
-    private String content;
+    private Integer stock;
 
     private LocalDateTime createTime;
 

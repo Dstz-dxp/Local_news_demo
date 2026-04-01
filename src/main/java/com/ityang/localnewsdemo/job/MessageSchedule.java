@@ -1,7 +1,14 @@
 package com.ityang.localnewsdemo.job;
 
+import cn.hutool.json.JSONUtil;
+import com.ityang.localnewsdemo.constant.ServiceTypeEnum;
 import com.ityang.localnewsdemo.entity.dataobject.MessageDO;
 import com.ityang.localnewsdemo.mapper.MessageMapper;
+import com.ityang.localnewsdemo.service.InventoryService;
+import com.ityang.localnewsdemo.service.MessageProcessService;
+import com.ityang.localnewsdemo.service.PointsService;
+import com.ityang.localnewsdemo.vo.req.InventoryReqVO;
+import com.ityang.localnewsdemo.vo.req.PointsReqVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +29,8 @@ import java.util.Random;
 public class MessageSchedule {
 
     private final MessageMapper messageMapper;
+
+    private final MessageProcessService messageProcessService;
 
     /*@Scheduled(fixedDelay = 5000)
     public void SendMessage(){
@@ -44,55 +53,13 @@ public class MessageSchedule {
 
         // 遍历记录，打印日志
         for (MessageDO message : messages) {
-            // 消息发送
-            log.info("模拟消息发送,订单ID为: {}",message.getOrderId());
-            // 如果某条消息发送失败，那么该条消息应该进入重试机制
-            Random r = new Random();
-            int i = r.nextInt(10);
-            if(i>3){
-                // 概率大于3时认为消息发送成功
-                // 将消息的状态由0改为1（已发送）
-                message.setStatus(1);
-                messageMapper.updateById(message);
-                log.info("订单ID为: {}的消息已发送",message.getOrderId());
-            }else {
-                // 概率不大于3时认为消息发送失败
-                // 消息的状态仍为0，需要重试，每重试一次消息的重试次数就要加1
-                message.setRetryCount(message.getRetryCount()+1);
-                log.info("订单ID为: {}的消息发送失败,进入重试机制",message.getOrderId());
-                retrySendMessage(message);
+            try {
+                messageProcessService.processMessage(message);
+            } catch (Exception e) {
+                log.error("消息ID为{},消息内容为{}的消息发送失败",message.getId(),message.getContent());
+                log.error("异常为: {}",e.getMessage());
+                e.printStackTrace();
             }
         }
-    }
-
-    private void retrySendMessage(MessageDO message) {
-        Integer re = message.getRetryCount();
-        while(re<4){
-            // 消息发送
-            log.info("模拟消息发送,订单ID为: {}",message.getOrderId());
-            Random r = new Random();
-            int i = r.nextInt(10);
-            if(i>3){
-                // 概率大于3时认为消息发送成功
-                // 将消息的状态由0改为1（已发送）
-                message.setStatus(1);
-                messageMapper.updateById(message);
-                log.info("订单ID为: {}的消息已发送",message.getOrderId());
-                return;
-            }else {
-                // 概率不大于3时认为消息发送失败
-                // 消息的状态仍为0，需要重试，每重试一次消息的重试次数就要加1
-                log.info("订单ID为: {}的消息重试发送失败{}次",message.getOrderId(),message.getRetryCount());
-                re++;
-                message.setRetryCount(re);
-            }
-        }
-        // 代码进行到这里，说明订单重试3次也完全失败
-        message.setStatus(2);
-        message.setRetryCount(message.getRetryCount());
-        // 记录错误日志，有待人工介入
-        messageMapper.updateById(message);
-        log.error("订单ID为: {}的消息重试3次发送失败，需要人工介入",message.getOrderId());
-
     }
 }
