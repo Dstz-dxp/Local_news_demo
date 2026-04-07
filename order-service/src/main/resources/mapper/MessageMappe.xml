@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ityang.order.mapper.MessageMapper">
+
+
+    <insert id="batchInsert">
+        insert into message(order_id,status,service_type,content)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderId},#{item.status},#{item.serviceType},#{item.content})
+        </foreach>
+    </insert>
+
+    <select id="selectByStatusIsFail" resultType="com.ityang.order.entity.dataobject.MessageDO">
+        select id,order_id,status,retry_count,service_type,
+               content,create_time,update_time
+        from message
+        where status = 2 and id > #{startId}
+        limit #{batchSize}
+    </select>
+
+</mapper>
